@@ -1,0 +1,32 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <script>
+        var url;
+        url = window.location.href;
+        if(url.indexOf("#")>-1){
+            url = url.replace(/#/, "?");
+            url = url.replace(/callback/,"oauthview");
+        window.location.href = url;
+        }
+
+    </script>
+
+    <div>
+    @{
+       
+        
+      }
+       
+    </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+body {
+    background-repeat: round;
+}
+
+.context {
+    margin-left: 10%;
+    margin-right: 10%;
+    width: 80%;
+    height: 100%;
+}
+
+.cardContext {
+    width: 30%;
+    height: 100%;
+    margin-right: 5%;
+}
+span.badge.project{font-weight:300;font-size:0.8rem;color:#fff;background-color:#26a69a;border-radius:2px}span.badge.project:after{content:" branch"}

@@ -1,0 +1,374 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="https://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+    <script src="https://img.hcharts.cn/highcharts/highcharts-more.js"></script>
+    <script src="https://img.hcharts.cn/highcharts/highcharts-3d.js"></script>
+    <script src="https://cdn.hcharts.cn/highstock/highstock.js"></script>
+    <script src="https://cdn.hcharts.cn/highmaps/highmaps.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+</head>
+<body>
+
+
+    <div id="container"></div>
+
+    <table>
+        <!--<tr style="width: 10%"></tr>-->
+        <tr>
+            <td style="width:10%;"> </td>
+            <td align="center">
+                <div id="yearContainer2"
+                     style=" margin: auto; min-width: 600px; max-width: 40%; height: 400px; "></div>
+            </td>
+            <td align="center">
+                <table class="striped" id="courseTable"></table>
+            </td>
+            <td style="width:10%;"> </td>
+        </tr>
+        <tr>
+            <td style="width:10%;"> </td>
+            <td>
+                <table class="striped" id="coursePointTable"></table>
+            </td>
+            <td>
+                <div id="yearContainer"
+                     style=" margin: auto; min-width: 600px; max-width: 40%; height: 400px; "></div>
+            </td>
+            <td style="width:10%;"> </td>
+        </tr>
+        <tr style="width: 10%"></tr>
+    </table>
+
+    <div>
+
+
+    </div>
+    <div>
+
+
+    </div>
+
+    <p id="test" style="visibility: hidden">@ViewBag.pn</p>
+
+
+    <script>
+        var input = document.getElementById("test").innerHTML;
+        var courseArray = eval(input);
+        var termObjet = {};
+        for (var i = 0; i < courseArray.length; i++) {
+            //        var a = termObjet[courseArray[i].year+courseArray[i].term];
+            console.log(courseArray[i].year + (courseArray[i].term == 1 ? " 上学期" : " 下学期") + "  " + i);
+            if (termObjet[courseArray[i].year + (courseArray[i].term == 1 ? " 上学期" : " 下学期")] == undefined) {
+                //            alert("sss");
+                termObjet[courseArray[i].year + (courseArray[i].term == 1 ? " 上学期" : " 下学期")] = [];
+                termObjet[courseArray[i].year + (courseArray[i].term == 1 ? " 上学期" : " 下学期")][0] = courseArray[i];
+            } else {
+                termObjet[courseArray[i].year + (courseArray[i].term == 1 ? " 上学期" : " 下学期")][termObjet[courseArray[i].year + (courseArray[i].term == 1 ? " 上学期" : " 下学期")].length] = courseArray[i];
+
+            }
+
+        }
+        console.log(termObjet);
+
+        var termNames = [];
+        var termPoints = [];
+
+        var inTermCourses = [];
+        var inTermCredit = [];
+        var inTermPoints = [];
+        var inTermScores = [];
+        var inTermPassScores = [];
+
+        for (var key in termObjet) {
+            termNames[termNames.length] = key;
+            for (var value in termObjet[key]) {
+
+            }
+            console.log(termObjet[key]);
+            termPoints[termPoints.length] = calcAchievementPoint(termObjet[key]);
+        }
+        function calcAchievementPoint(array) {
+            var point = 0.0;
+            var achievement = 0.0;
+            for (var i = 0; i < array.length; i++) {
+                var a = 0.0;
+                if (array[i].score == "100") {
+                    a += 5;
+                } else if(parseInt(array[i].score) < 60){
+        a += 0;
+        }
+        else{
+                    var sc = parseInt(array[i].score);
+                    //                console.log("sc="+sc);
+                    a += (parseInt((sc - 60) / 5) * 0.5) + 1;
+                    //                console.log("a="+a);
+                }
+                achievement += a * parseFloat(array[i].credit);
+                point += parseFloat(array[i].credit);
+            }
+            //        console.log("ach=" + achievement +";point=" + point);
+            return achievement / point;
+        }
+
+        function calcAchieventPoints(array) {
+            var points = [];
+            for (var i = 0; i < array.length; i++) {
+                if (array[i].score == "100") {
+                    points[points.length] = 5;
+                } else if(parseInt(array[i].score)<6){
+        points[points.length] = 0;
+        }else {
+                    var sc = parseInt(array[i].score);
+                    //                console.log("sc="+sc);
+                    points[points.length] = (parseInt((sc - 60) / 5) * 0.5) + 1;
+                    //                console.log("a="+a);
+                }
+            }
+            return points;
+        }
+
+
+    </script>
+
+    <script type="text/javascript">
+        var chart;
+        $(chart = function () {
+            // Set up the chart
+            new Highcharts.Chart({
+                chart: {
+                    renderTo: 'container',
+                    type: 'column',
+                    options3d: {
+                        enabled: true,
+                        alpha: 15,
+                        beta: 15,
+                        depth: 50,
+                        viewDistance: 25
+                    },
+
+                },
+                title: {
+                    text: '学期平均绩点柱状图'
+                },
+                subtitle: {
+                    text: '点击滑块可显示每学期绩点视图'
+                },
+                //            plotOptions: {
+                //                column: {
+                //                    depth: 25
+                //                }
+                //
+                //            },
+                plotOptions: {
+                    column: {
+                        depth: 25
+                    },
+                    series: {
+                        cursor: 'pointer',
+                        //                    events: {
+                        //                        click: function (event) {
+                        //
+                        ////                            showValues();
+                        ////                            click: onTermCilck
+                        //                        }
+                        //                    },
+                        point: {
+                            events: {
+                                click: onTermCilck
+                            }
+                        }
+                    }
+                },
+                xAxis: {
+                    categories: termNames
+                    //                categories: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+                },
+                series: [{
+                    name: '学期平均绩点',
+                    colorByPoint: true,
+                    data: termPoints
+                    //                data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+
+                }]
+
+            });
+
+            //        function showValues() {
+            //            chart.options.chart.options3d.alpha = a;
+            //            chart.options.chart.options3d.beta = b;
+            //            chart.options.chart.options3d.depth = d;
+            //        }
+
+            // Activate the sliders
+            // $('#sliders input').on('input change', function () {
+            //     chart.options.chart.options3d[this.id] = this.value;
+            //     showValues();
+            //     chart.redraw(false);
+            // });
+
+            //        var aa = setInterval(function(){a-=1;
+            //            b-=1;
+            //            d-=1;
+            //            if(a<15){clearInterval(aa);showValues();}
+            //            showValues();
+            //            chart.redraw(false);
+            //        },20);
+            //        showValues();
+        });
+
+        function onTermCilck(e) {
+            //            alert('您点击的柱子是：' + this.category);
+            $('#courseTable').html("");
+            $('#coursePointTable').html("");
+            inTermCourses = [];
+            inTermCredit = [];
+            inTermScores = [];
+            inTermPoints = [];
+            inTermPassScores = [];
+            var table = "<thead> <tr> <th>课程名称</th> <th>任课教师</th> <th>课程类型</th> <th>学分</th> <th>成绩</th> </tr> </thead>"
+            var pointTable = "<thead> <tr> <th>课程名称</th> <th>任课教师</th> <th>课程类型</th> <th>单科绩点</th> </tr> </thead>"
+            table += "<tbody>";
+            pointTable += "<tbody>";
+
+            inTermPoints = calcAchieventPoints(termObjet[this.category]);
+            for (var i = 0; i < termObjet[this.category].length; i++) {
+                inTermCourses[inTermCourses.length] = termObjet[this.category][i].courseName;
+                inTermCredit[inTermCredit.length] = parseFloat(termObjet[this.category][i].credit);
+                inTermScores[inTermScores.length] = parseInt(termObjet[this.category][i].score);
+                inTermPassScores[inTermPassScores.length] = 60;
+                var c = "<tr> <td>" + termObjet[this.category][i].courseName + "</td> <td>" + termObjet[this.category][i].teacherName + "</td> <td>" + termObjet[this.category][i].compulsory + "</td> <td>" + termObjet[this.category][i].credit + "</td><td>" + termObjet[this.category][i].score + "</td></tr>"
+                var pc = "<tr> <td>" + termObjet[this.category][i].courseName + "</td> <td>" + termObjet[this.category][i].teacherName + "</td> <td>" + termObjet[this.category][i].compulsory + "</td> <td>" + inTermPoints[i] + "</td></tr>"
+                table += c;
+                pointTable += pc;
+            }
+            table += "</tbody>";
+            pointTable += "</tbody>";
+            $("#courseTable").append(table);
+            $("#coursePointTable").append(pointTable);
+
+            //        console.log("sss");
+            //        console.log(termObjet[this.category]);
+            console.log(inTermScores);
+            console.log(inTermPassScores);
+
+            reflash();
+        }
+
+
+    </script>
+
+    <script>
+        var rightChart;
+        var leftChart;
+         $( rightChart = function () {
+        new Highcharts.Chart({
+            chart: {
+                renderTo: 'yearContainer2',
+                polar: true,
+                type: 'line'
+                },
+                title: {
+                    text: '单学期分数统计图',
+                    x: -80
+                },
+                pane: {
+                    size: '80%'
+                },
+                xAxis: {
+                    categories: inTermCourses,
+                    tickmarkPlacement: 'on',
+                    lineWidth: 0
+                },
+                yAxis: {
+                    gridLineInterpolation: 'polygon',
+                    lineWidth: 0,
+                    min: 0
+                },
+                tooltip: {
+                    shared: true,
+                    //                pointFormat: '<span style="color:{series.color}">{series.name}: <b>${point.y:,.0f}</b><br/>'
+                },
+                legend: {
+                    align: 'right',
+                    verticalAlign: 'top',
+                    y: 70,
+                    layout: 'vertical'
+                },
+                series: [{
+                    name: '分数',
+                    data: inTermScores,
+                    pointPlacement: 'on'
+                },
+                    {
+                        name: '及格分数',
+                        data: inTermPassScores,
+                        color: '#8BFF89',
+                        type: 'area'
+                    },
+                    {
+                        name: '学分',
+                        data: inTermCredit,
+                        color: '#ffffff',
+                        type: 'line'
+                    }]
+            });
+        });
+
+        $(leftChart = function () {
+        new Highcharts.Chart({
+            chart: {
+                renderTo: 'yearContainer',
+                type: 'column',
+                margin: 75,
+                options3d: {
+                    enabled: true,
+                    alpha: 10,
+                    beta: 25,
+                    depth: 70
+                }
+            },
+                title: {
+                    text: '单学期绩点统计图'
+                },
+                subtitle: {
+                    text: ''
+                },
+                plotOptions: {
+                    column: {
+                        depth: 25
+                    }
+                },
+                xAxis: {
+                    categories: inTermCourses
+                },
+                yAxis: {
+                    title: {
+                        text: null
+                    }
+                },
+                series: [{
+                    name: '单科绩点',
+                    data: inTermPoints,
+                    colorByPoint: true
+                }]
+            });
+        });
+        function reflash() {
+            leftChart();
+            rightChart();
+        }
+
+    </script>
+
+</body>
+</html>
